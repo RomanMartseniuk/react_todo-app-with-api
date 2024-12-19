@@ -208,15 +208,16 @@ export const App: React.FC = () => {
     const activeTodos = todos.filter(item => !item.completed);
 
     if (activeTodos.length > 0) {
-      const newTodos = [...todos].map(todo => {
-        return activeTodos.find(t => t.id === todo.id)
-          ? { ...todo, completed: true }
-          : todo;
+      setTodos(prevTodos => {
+        return prevTodos.map(todo =>
+          todo.completed ? todo : { ...todo, completed: true },
+        );
       });
 
-      setTodos(newTodos);
-      // switchTodos(activeTodos);
+      return;
     }
+
+    setTodos(prev => prev.map(todo => ({ ...todo, completed: false })));
   };
 
   useEffect(() => {
