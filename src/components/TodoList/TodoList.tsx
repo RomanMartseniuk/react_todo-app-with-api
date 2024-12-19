@@ -8,7 +8,7 @@ type Props = {
   todos: Todo[];
   handleDeleteTodo: (id: number, callback: (arg: boolean) => void) => void;
   handleUpdateTodo: (todo: Todo, callback: (arg: boolean) => void) => void;
-  deletingCompleteTodos: boolean;
+  loadingTodos: number[];
   tempTodo: Todo | null;
 };
 
@@ -16,7 +16,7 @@ export const TodoList: React.FC<Props> = ({
   todos,
   handleDeleteTodo,
   handleUpdateTodo,
-  deletingCompleteTodos,
+  loadingTodos,
   tempTodo,
 }) => {
   return (
@@ -28,7 +28,7 @@ export const TodoList: React.FC<Props> = ({
             todo={todo}
             handleDeleteTodo={handleDeleteTodo}
             handleUpdateTodo={handleUpdateTodo}
-            loading={deletingCompleteTodos && todo.completed}
+            loading={loadingTodos.includes(todo.id)}
           />
         );
       })}

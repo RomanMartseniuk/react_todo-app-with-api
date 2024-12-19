@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 
 import { Todo } from '../../types/Todo';
@@ -23,11 +23,34 @@ export const TodoItem: React.FC<Props> = ({
 
   const [currentTodo, setCurrentTodo] = useState<Todo>(todo);
 
+  useEffect(() => {
+    setCurrentTodo(todo);
+  }, [todo]);
+
+  useEffect(() => {
+    setIsLoading(loading);
+  }, [loading]);
+
   const changeIsLoading = (state: boolean) => setIsLoading(state);
 
   const onTodoUpdate = async () => {
+    currentTodo.title = currentTodo.title.trim();
+    if (currentTodo.title === '') {
+      handleDeleteTodo(currentTodo.id, changeIsLoading);
+
+      return;
+    }
+
+    if (currentTodo.title === todo.title) {
+      setIsChanging(false);
+
+      return;
+    }
+
     try {
       await handleUpdateTodo(currentTodo, setIsLoading);
+
+      setIsChanging(false);
     } catch (err) {
       setIsChanging(true);
     }
@@ -54,14 +77,17 @@ export const TodoItem: React.FC<Props> = ({
   };
 
   const handleOnKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === 'Escape') {
-      setIsChanging(false);
+    if (e.key === 'Enter') {
       onTodoUpdate();
+    }
+
+    if (e.key === 'Escape') {
+      setIsChanging(false);
+      setCurrentTodo(todo);
     }
   };
 
   const handleOnBlur = () => {
-    setIsChanging(false);
     onTodoUpdate();
   };
 
@@ -82,6 +108,7 @@ export const TodoItem: React.FC<Props> = ({
 
       {isChanging ? (
         <input
+          data-cy="TodoTitleField"
           type="text"
           value={currentTodo.title}
           onBlur={() => handleOnBlur()}
@@ -99,17 +126,19 @@ export const TodoItem: React.FC<Props> = ({
         </span>
       )}
 
-      <button
-        type="button"
-        className="todo__remove"
-        data-cy="TodoDelete"
-        onClick={e => {
-          e.preventDefault();
-          handleDeleteTodo(currentTodo.id, changeIsLoading);
-        }}
-      >
-        ×
-      </button>
+      {!isChanging && (
+        <button
+          type="button"
+          className="todo__remove"
+          data-cy="TodoDelete"
+          onClick={e => {
+            e.preventDefault();
+            handleDeleteTodo(currentTodo.id, changeIsLoading);
+          }}
+        >
+          ×
+        </button>
+      )}
 
       <div
         data-cy="TodoLoader"

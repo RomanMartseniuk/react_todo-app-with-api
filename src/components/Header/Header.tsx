@@ -11,7 +11,7 @@ type Props = {
   createFunc: () => void;
   completeFunc: () => void;
   todos: Todo[];
-  completingTodos: boolean;
+  loadingTodos: number[];
 };
 
 export const Header: React.FC<Props> = ({
@@ -21,7 +21,7 @@ export const Header: React.FC<Props> = ({
   createFunc,
   completeFunc,
   todos,
-  completingTodos,
+  loadingTodos,
 }) => {
   return (
     <header className="todoapp__header">
@@ -30,13 +30,13 @@ export const Header: React.FC<Props> = ({
         <button
           type="button"
           className={classNames('todoapp__toggle-all', {
-            active: todos.filter(todo => !todo.completed).length > 0,
+            active: todos.filter(todo => !todo.completed).length === 0,
           })}
           data-cy="ToggleAllButton"
           onClick={() => {
             completeFunc();
           }}
-          disabled={completingTodos}
+          disabled={loadingTodos.length > 0}
         />
       )}
       {/* Add a todo on form submit */}

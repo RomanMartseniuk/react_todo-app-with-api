@@ -19,10 +19,7 @@ export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [filterBy, setFilterBy] = useState<FilterBy>(FilterBy.all);
-
-  const [deletingCompleteTodos, setDeletingCompleteTodos] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [completingTodos, setCompletingTodos] = useState(false);
+  const [loadingTodos, setLoadingTodos] = useState<number[]>([]);
 
   const [errorMessage, setErrorMessage] = useState<ErrorMessage>('');
 
@@ -65,8 +62,7 @@ export const App: React.FC = () => {
   };
 
   const handleDeleteAllCompletedTodos = async () => {
-    setDeletingCompleteTodos(true);
-
+    setLoadingTodos(todos.filter(todo => todo.completed).map(todo => todo.id));
     todoServices
       .deleteArrOfTodos(todos.filter(todo => todo.completed))
       .then(res => {
@@ -91,7 +87,7 @@ export const App: React.FC = () => {
         setTimeout(() => setErrorMessage(''), 3000);
       })
       .finally(() => {
-        setDeletingCompleteTodos(false);
+        setLoadingTodos([]);
         focusInput();
       });
   };
@@ -166,58 +162,44 @@ export const App: React.FC = () => {
       });
   };
 
-  // const switchTodos = (arr: Todo[]) => {
-  //   // Optimistically update todos
-  //   setTodos(currTodos => {
-  //     return currTodos.map(todo => {
-  //       const updatedTodo = arr.find(t => t.id === todo.id);
+  const switchTodos = (arr: Todo[]) => {
+    setLoadingTodos(arr.map(todo => todo.id));
+    todoServices
+      .switchTodosStatus(arr)
+      .then(result => {
+        const updatedTodos = result
+          .filter(res => res.status === 'fulfilled')
+          .map(res => res.value);
 
-  //       return updatedTodo
-  //         ? { ...todo, completed: updatedTodo.completed }
-  //         : todo;
-  //     });
-  //   });
+        // Now update the state with the API results
+        setTodos(currTodos =>
+          currTodos.map(todo => {
+            const updatedTodo = updatedTodos.find(t => t.id === todo.id);
 
-  //   todoServices
-  //     .switchTodosStatus(arr)
-  //     .then(result => {
-  //       const updatedTodos = result
-  //         .filter(res => res.status === 'fulfilled')
-  //         .map(res => res.value);
-
-  //       // Now update the state with the API results
-  //       setTodos(currTodos =>
-  //         currTodos.map(todo => {
-  //           const updatedTodo = updatedTodos.find(t => t.id === todo.id);
-
-  //           return updatedTodo ? { ...todo, ...updatedTodo } : todo;
-  //         }),
-  //       );
-  //     })
-  //     .catch(() => {
-  //       setErrorMessage('Unable to update a todo');
-  //       setTimeout(() => setErrorMessage(''), 3000);
-  //     })
-  //     .finally(() => {
-  //       setCompletingTodos(false);
-  //       focusInput();
-  //     });
-  // };
+            return updatedTodo ? { ...todo, ...updatedTodo } : todo;
+          }),
+        );
+      })
+      .catch(() => {
+        setErrorMessage('Unable to update a todo');
+        setTimeout(() => setErrorMessage(''), 3000);
+      })
+      .finally(() => {
+        setLoadingTodos([]);
+        focusInput();
+      });
+  };
 
   const handleSwitchTodosStatus = () => {
     const activeTodos = todos.filter(item => !item.completed);
 
     if (activeTodos.length > 0) {
-      setTodos(prevTodos => {
-        return prevTodos.map(todo =>
-          todo.completed ? todo : { ...todo, completed: true },
-        );
-      });
+      switchTodos(activeTodos);
 
       return;
     }
 
-    setTodos(prev => prev.map(todo => ({ ...todo, completed: false })));
+    switchTodos(todos);
   };
 
   useEffect(() => {
@@ -248,14 +230,14 @@ export const App: React.FC = () => {
           createFunc={handleAddingTodo}
           todos={todos}
           completeFunc={handleSwitchTodosStatus}
-          completingTodos={completingTodos}
+          loadingTodos={loadingTodos}
         />
 
         <TodoList
           todos={currentTodoList}
           handleDeleteTodo={handleDeleteTodo}
           handleUpdateTodo={handleUpdatingTodo}
-          deletingCompleteTodos={deletingCompleteTodos}
+          loadingTodos={loadingTodos}
           tempTodo={tempTodo}
         />
 
