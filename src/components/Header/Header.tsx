@@ -8,8 +8,8 @@ type Props = {
   inputRef: React.RefObject<HTMLInputElement>;
   inputText: string;
   setInputText: (value: string) => void;
-  createFunc: () => void;
-  completeFunc: () => void;
+  handleCreateTodo: () => void;
+  handleCompleteTodo: () => void;
   todos: Todo[];
   loadingTodos: number[];
 };
@@ -18,11 +18,13 @@ export const Header: React.FC<Props> = ({
   inputRef,
   inputText,
   setInputText,
-  createFunc,
-  completeFunc,
+  handleCreateTodo,
+  handleCompleteTodo,
   todos,
   loadingTodos,
 }) => {
+  const includesActiveTodos = todos.filter(todo => !todo.completed).length > 0;
+
   return (
     <header className="todoapp__header">
       {/* this button should have `active` class only if all todos are completed */}
@@ -30,12 +32,10 @@ export const Header: React.FC<Props> = ({
         <button
           type="button"
           className={classNames('todoapp__toggle-all', {
-            active: todos.filter(todo => !todo.completed).length === 0,
+            active: !includesActiveTodos,
           })}
           data-cy="ToggleAllButton"
-          onClick={() => {
-            completeFunc();
-          }}
+          onClick={handleCompleteTodo}
           disabled={loadingTodos.length > 0}
         />
       )}
@@ -48,14 +48,11 @@ export const Header: React.FC<Props> = ({
           placeholder="What needs to be done?"
           value={inputText}
           ref={inputRef}
-          onChange={e => {
-            e.preventDefault();
-            setInputText(e.target.value);
-          }}
+          onChange={e => setInputText(e.target.value)}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              createFunc();
+              handleCreateTodo();
             }
           }}
         />

@@ -102,7 +102,7 @@ export const TodoItem: React.FC<Props> = ({
           type="checkbox"
           className="todo__status"
           checked={currentTodo.completed}
-          onChange={() => setTodoCompleted()}
+          onChange={setTodoCompleted}
         />
       </label>
 
@@ -131,10 +131,7 @@ export const TodoItem: React.FC<Props> = ({
           type="button"
           className="todo__remove"
           data-cy="TodoDelete"
-          onClick={e => {
-            e.preventDefault();
-            handleDeleteTodo(currentTodo.id, changeIsLoading);
-          }}
+          onClick={() => handleDeleteTodo(currentTodo.id, changeIsLoading)}
         >
           ×
         </button>

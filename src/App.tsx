@@ -227,9 +227,9 @@ export const App: React.FC = () => {
           inputRef={inputRef}
           inputText={inputText}
           setInputText={setInputText}
-          createFunc={handleAddingTodo}
+          handleCreateTodo={handleAddingTodo}
           todos={todos}
-          completeFunc={handleSwitchTodosStatus}
+          handleCompleteTodo={handleSwitchTodosStatus}
           loadingTodos={loadingTodos}
         />
 
