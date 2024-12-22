@@ -37,7 +37,7 @@ export const TodoList: React.FC<Props> = ({
           todo={tempTodo}
           handleDeleteTodo={handleDeleteTodo}
           handleUpdateTodo={handleUpdateTodo}
-          loading={true}
+          loading
         />
       )}
     </section>

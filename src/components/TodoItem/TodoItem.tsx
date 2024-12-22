@@ -109,6 +109,7 @@ export const TodoItem: React.FC<Props> = ({
       {isChanging ? (
         <input
           data-cy="TodoTitleField"
+          className="todo__title-field"
           type="text"
           value={currentTodo.title}
           onBlur={() => handleOnBlur()}
